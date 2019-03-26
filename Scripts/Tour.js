@@ -4,16 +4,15 @@ class Tour
 {
 
     // constructor(tour_id,graphic,grid_parameters, color_parameters)
-    constructor(tour_id,graphic, graphics_parameters, transform_parameters)
+    constructor(tour_id,graphic,parameters)
     {
         this.tour_id = tour_id
         this.graphic = graphic
-        this.transform_parameters = transform_parameters
-        this.graphics_parameters = graphics_parameters
+        this.parameters = parameters
         // this.parameters.GP.grid_sequence_type == 'general' ?
         // this.graphic.translate(this.parameters.GP.xShift[tour_id],-this.parameters.GP.yShift[tour_id]) : 
         // this.zoom = this.parameters.GP.zoom 
-        this.transform_parameter_values = []
+        this.transform_values = []
         this.transform_functions = []
         this.x = 0
         this.y = 0
@@ -22,7 +21,7 @@ class Tour
         this.last_transform_index
         this.save_points = false
 
-        this.matrix_machine = new MatrixManipulator(this.transform_parameters.linear)
+        this.matrix_machine = new MatrixManipulator(this.parameters)
 
 
         this.draw = this.draw.bind(this)
@@ -30,13 +29,42 @@ class Tour
         this.nextPoint = this.nextPoint.bind(this)
         this.set_transform_functions = this.set_transform_functions.bind(this)
         this.setParameters = this.setParameters.bind(this)
-        // this.set_fill_colors = this.set_fill_colors.bind(this)
-        // this.set_background_colors = this.set_background_colors.bind(this)
         this.set_save_points = this.set_save_points.bind(this)
         this.getGraphic = this.getGraphic.bind(this)
-        // this.set_overlay = this.set_overlay.bind(this)
-        // this.set_color_transform = this.set_color_transform.bind(this)
     }
+
+    setParameters(start_parameters_one,start_parameters_two, constant_vals)
+    {
+        this.constant_vals = constant_vals
+
+        this.transform_values.push(start_parameters_one)
+        this.transform_values.push(start_parameters_two)
+        // for(let j = 0; j < this.parameters.TP.function_count; j++)
+        // {
+        //     // let current_function_parameters = []
+        //     // for(let k = 0; k < this.transform_parameters.linear.shape.x * this.transform_parameters.linear.shape.y; k++)
+        //     // current_function_parameters.push()
+            
+        //     this.transform_values.push(this.matrix_machine.generateRandomParameters())   
+        // }
+        // console.log('set parameters',this.transform_values)
+    
+    }
+
+    set_transform_functions()
+    {
+        // console.log('set functions',this.transform_values)
+
+        for(let k = 0; k < this.parameters.TP.function_count; k++)
+        {
+            this.transform_functions.push((x,y) => {return {
+                x : this.transform_values[k][0][0] * x + this.transform_values[k][0][1]  * y + random(1),
+                y : this.transform_values[k][1][0] * x + this.transform_values[k][1][1] * y + random(1),    
+            }})
+        }
+        // console.log('Tour', this.tour_id, ' Transform Functions', this.transform_functions)
+    }
+
 
     set_save_points()
     {
@@ -52,7 +80,7 @@ class Tour
 
     draw()
     {
-        for(let j = 0; j < this.graphics_parameters.point_count_per_frame; j++)
+        for(let j = 0; j < this.parameters.GP.point_count_per_frame; j++)
         {
             this.nextPoint()
             this.drawPoint()
@@ -61,11 +89,11 @@ class Tour
 
     nextPoint()
     {
-        let function_prob = 1 / this.transform_functions.length
+        let function_prob = 1 / this.parameters.TP.function_count
         let nextPoint;
         let prob = random(1)
         let sum = 0
-        for(let i = 0; i < this.transform_functions.length; i++)
+        for(let i = 0; i < this.parameters.TP.function_count; i++)
         {
             // sum += this.transform_parameters[i][this.transform_parameters[i].length - 1]
             sum += function_prob
@@ -83,34 +111,7 @@ class Tour
         this.point_count++
     }
     
-    setParameters()
-    {
-        for(let j = 0; j < this.transform_parameters.transform_function_count; j++)
-            this.transform_parameter_values.push(this.matrix_machine.generateRandomParameters())   
-    }
 
-    set_transform_functions()
-    {
-        // console.log('transform parameters for tour ', this.tour_id, ':', this.transform_parameters)
-        // for(let i = 0; i < transform_parameters.length; i++)
-        // {
-        //     this.transform_functions.push((x,y) => {return {
-        //         x : transform_parameters[i][0] * x + transform_parameters[i][1]  * y + transform_parameters[i][4], 
-        //         y : transform_parameters[i][2] * x + transform_parameters[i][3] * y + transform_parameters[i][5]             
-        //     }})
-        // }
-        console.log(this.transform_parameters)
-        for(let k = 0; k < this.transform_parameters.transform_function_count; k++)
-        {
-            console.log('phil',k)
-            this.transform_functions.push((x,y) => {return {
-                x : this.transform_parameter_values[k][0][0] * x + this.transform_parameter_values[k][0][1]  * y,
-                y : this.transform_parameter_values[k][1][0] * x + this.transform_parameter_values[k][1][1] * y,    
-            }})
-            console.log('tour',k,' parameters',this.transform_parameter_values)
-        }
-        console.log('Tour', this.tour_id, ' Transform Functions', this.transform_functions)
-    }
 
     drawPoint()
     {
@@ -121,76 +122,6 @@ class Tour
         this.graphic.point(this.x,this.y)
         this.draws += 1
     }
-
-    // set_color_transform(transform_parameters)
-    // {
-    //     this.color_transform_function = (x,y) => {
-    //         return{
-    //             x : transform_parameters[0][0] * x + transform_parameters[0][1]  * y + transform_parameters[0][4], 
-    //             y : transform_parameters[0][2] * x + transform_parameters[0][3] * y + transform_parameters[0][5]                   
-    //         }
-    //     }
-    // }
-    
-
-
-
-    // set_background_colors(background_color_index,background_colors)
-    // {
-        
-    //     this.background_color_index = background_color_index
-    //     this.background_colors = background_colors
-    //     this.graphic.background(this.background_colors[background_color_index].getRGB())
-
-    // }
-
-    // set_fill_colors(fill_color_index, fill_colors)
-    // {   
-    //     // console.log('hex vals',colors)
-    //     this.fill_color_index = fill_color_index
-    //     this.fill_colors = fill_colors
-    //     // console.log('fill colors',fill_colors)
-
-    //     if (this.parameters.CP.type == 'Const')
-    //     {        
-    //         this.graphic.stroke(this.fill_colors[fill_color_index].getRGB())
-    //     }
-    //     else if (this.parameters.CP.type == 'color by function')
-    //     {
-    //         //set stroke to one color
-    //         this.function_color_indexes = []
-    //         // second
-    //         for(let i = 0; i < this.transform_parameters.length;i++)
-    //         {
-    //             this.function_color_indexes.push(color_machine.getRandomColourHex())
-               
-    //         }
-    //         console.log('color indexs for tour',this.tour_id,this.function_color_indexes)
-    //     }
-    //     else if (this.parameters.CP.type == 'gradient by direction')
-    //     {
-    //         console.log(this.fill_colors)
-    //         // this.lowColor = this.fill_colors[0]//.getHex()
-    //         this.lowColor = new Color('#FFFFFF')//.getHex()
-    //         // this.highColor = this.fill_colors[1]//.getHex()
-    //         this.highColor = new Color('#000000')//.getHex()
-    //         console.log('low color',this.lowColor.getHex())
-    //         console.log('high color',this.highColor.getHex())
-    //         this.graphic.stroke(color_machine.getColourHex('green'))
-    //     }
-    //     else if (this.parameters.CP.type == 'color by extra transform')
-    //     {
-
-    //         this.lowColor = this.fill_colors[0]//.getHex()
-    //         this.highColor = this.fill_colors[1]//.getHex()
-    //         this.graphic.stroke(color_machine.getColourHex('green'))
-    //     }
-
-
-    // }
-
-
-
 
     getGraphic()
     {

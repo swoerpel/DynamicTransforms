@@ -4,11 +4,14 @@ class MatrixManipulator
 {
 
     constructor(parameters)
-    {
-        this.tolerance = parameters.tolerance
-        this.precision = parameters.precision
-        this.shape     = parameters.shape
+    {   
+        this.parameters = parameters
+        console.log('parameters', this.parameters)
+        this.tolerance = parameters.TP.linear.tolerance
+        this.precision = parameters.TP.linear.precision
+        this.shape     = parameters.TP.linear.shape
         this.generateRandomParameters = this.generateRandomParameters.bind(this)
+        this.incrementParameters = this.incrementParameters.bind(this)
     }
 
     generateRandomParameters()
@@ -25,6 +28,18 @@ class MatrixManipulator
         }
         return rand_matrix
         
+    }
+
+    incrementParameters(parameters, step)
+    {
+        for(let i = 0; i < this.parameters.TP.function_count; i++)
+        {
+            for (let j = 0; j < this.shape.x; j++)
+            {
+                parameters[i][j] += step
+            }
+        }
+        return parameters
     }
 
 
